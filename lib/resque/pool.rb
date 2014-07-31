@@ -273,6 +273,15 @@ module Resque
     def signal_all_workers(signal)
       all_pids.each do |pid|
         Process.kill signal, pid
+        log "kill sent, signal: #{signal}, pid: #{pid}"
+        if signal == :TERM || signal == :QUIT
+          begin
+            log "waiting to teminate, pid: #{pid}"
+            Process.waitpid(pid)
+            log "terminated, pid: #{pid}"
+          rescue Errno::ECHILD => e
+          end
+        end
       end
     end
 
