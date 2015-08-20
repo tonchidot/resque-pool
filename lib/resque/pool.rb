@@ -276,10 +276,19 @@ module Resque
         log "kill sent, signal: #{signal}, pid: #{pid}"
         if signal == :TERM || signal == :QUIT
           begin
-            log "waiting to teminate, pid: #{pid}"
-            Process.waitpid(pid)
-            log "terminated, pid: #{pid}"
+            Timeout.timeout(30) do
+              log "waiting to terminate w/ #{signal}, pid: #{pid}"
+              Process.waitpid(pid)
+              log "terminated w/ #{signal}, pid: #{pid}"
+            end
           rescue Errno::ECHILD => e
+            # do nothing
+          rescue Timeout::Error
+            log "timed out to terminate, pid: #{pid}, KILL signal will send"
+            Process.kill :KILL, pid
+            log "waiting to terminate w/ KILL, pid: #{pid}"
+            Process.waitpid(pid)
+            log "terminated w/ KILL, pid: #{pid}"
           end
         end
       end
