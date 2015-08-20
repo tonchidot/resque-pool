@@ -277,7 +277,7 @@ module Resque
         if signal == :TERM || signal == :QUIT
           begin
             Timeout.timeout(30) do
-              log "waiting to temrinate w/ #{signal}, pid: #{pid}"
+              log "waiting to terminate w/ #{signal}, pid: #{pid}"
               Process.waitpid(pid)
               log "terminated w/ #{signal}, pid: #{pid}"
             end
